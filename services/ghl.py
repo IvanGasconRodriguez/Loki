@@ -1,11 +1,11 @@
 import httpx
-from config import GHL_API_KEY, GHL_LOCATION_ID
+from config import GHL_ACCESS_TOKEN, GHL_LOCATION_ID
 
 BASE_URL = "https://services.leadconnectorhq.com"
 
 HEADERS = {
     "Authorization": f"Bearer {GHL_API_KEY}",
-    "Version": "2021-07-28",
+    "Version": "2021-04-15",
     "Content-Type": "application/json"
 }
 
