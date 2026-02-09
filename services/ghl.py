@@ -4,8 +4,13 @@ from config import GHL_ACCESS_TOKEN, GHL_LOCATION_ID
 BASE_URL = "https://services.leadconnectorhq.com"
 
 HEADERS = {
+<<<<<<< HEAD
     "Authorization": f"Bearer {GHL_ACCESS_TOKEN}",
     "Version": "2021-07-28",
+=======
+    "Authorization": f"Bearer {GHL_API_KEY}",
+    "Version": "2021-04-15",
+>>>>>>> 7dce87f5a99c2c34d1b81941cba15fa54d087283
     "Content-Type": "application/json"
 }
 
