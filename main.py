@@ -31,12 +31,14 @@ async def chat(req: ChatRequest):
 
         summary = "Leads sin contactar:\n"
         for l in leads:
-            summary += f"- {l['name']} | {l['pipeline']} | {l['stage']}\n"
+            summary += f"- {l['name']} | stage_id: {l['stage_id']}\n"
+
 
         return {
-            "answer": explain(summary),
-            "data": leads
-        }
+             "answer": summary,
+             "count": len(leads)
+            }
+
 
     return {"answer": "No entendí la petición."}
 
