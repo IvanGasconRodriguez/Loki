@@ -4,24 +4,28 @@ from config import GHL_ACCESS_TOKEN, GHL_LOCATION_ID
 BASE_URL = "https://services.leadconnectorhq.com"
 
 HEADERS = {
-<<<<<<< HEAD
     "Authorization": f"Bearer {GHL_ACCESS_TOKEN}",
-    "Version": "2021-07-28",
-=======
-    "Authorization": f"Bearer {GHL_API_KEY}",
     "Version": "2021-04-15",
->>>>>>> 7dce87f5a99c2c34d1b81941cba15fa54d087283
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
 }
 
+
 async def get_opportunities():
+    # Para buscar oportunidades en la v2 con la versión 2021-04-15,
+    # se usa el método POST y el locationId va en el cuerpo (JSON)
     url = f"{BASE_URL}/opportunities/search"
-    payload = {
-        "locationId": GHL_LOCATION_ID,
-        "limit": 100
-    }
+
+    payload = {"locationId": GHL_LOCATION_ID.strip()}
 
     async with httpx.AsyncClient(timeout=15) as client:
+        # Enviamos la petición como POST con json=payload
         r = await client.post(url, json=payload, headers=HEADERS)
+
+        if r.status_code != 200:
+            print(f"Error de GHL detallado: {r.text}")
+
         r.raise_for_status()
-        return r.json().get("opportunities", [])
+
+        # GHL devuelve un objeto que contiene una lista llamada 'opportunities'
+        data = r.json()
+        return data.get("opportunities", [])
