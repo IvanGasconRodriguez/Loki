@@ -16,30 +16,43 @@ def normalize_opportunities(opps):
                 "pipeline": o.get("pipelineId", "N/A"),
                 "owner": o.get("assignedTo"),
                 "created_at": o.get("createdAt"),
+                "source": o.get("source")
             }
         )
 
     return state
 
 
-def leads_sin_contacto(state, minutes=1440):
+
+LEAD_ENTRANTE_STAGE_ID = "82ae1545-2029-4c0c-8c00-a60c21ab4f10"
+TAG_CONTACTO_REALIZADO = "accion - contacto manual"
+
+
+def parse_iso_date(value):
+    if isinstance(value, str):
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    return None
+
+
+def leads_sin_contacto(state, minutes=60):
     now = datetime.now(timezone.utc)
     result = []
 
     for o in state:
-        if not o["created_at"]:
+        # Solo Lead Entrante
+        if o["stage"] != LEAD_ENTRANTE_STAGE_ID:
             continue
 
-        # Convertimos la fecha de GHL a formato Python
-        try:
-            # GHL usa milisegundos, por eso dividimos por 1000
-            created = datetime.fromisoformat(o["created_at"].replace("Z", "+00:00"))
-
-            # Aquí la regla: si lleva más de 'X' minutos en una etapa específica
-            if now - created > timedelta(minutes=minutes):
-                result.append(o)
-        except Exception as e:
-            print(f"Error procesando fecha: {e}")
+        # Excluir si ya fue contactado
+        if TAG_CONTACTO_REALIZADO in o.get("tags", []):
             continue
+
+        # SLA tiempo
+        created = parse_iso_date(o["created_at"])
+        if not created:
+            continue
+
+        if now - created > timedelta(minutes=minutes):
+            result.append(o)
 
     return result

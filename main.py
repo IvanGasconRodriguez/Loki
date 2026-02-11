@@ -23,13 +23,22 @@ async def chat(req: ChatRequest):
         leads = leads_sin_contacto(state)
 
         if not leads:
-            return {"answer": "No hay leads pendientes por priorizar.", "data": []}
+            return {
+                 "answer": "✅ Todo bajo control. No hay leads nuevos en 'Lead Entrante' pendientes de primer contacto."
+            }
 
-        summary = "Leads sin contactar:\n"
+        summary = "🚨 Leads pendientes de primer contacto:\n\n"
+
         for l in leads:
-            summary += f"- {l['name']} | {l['pipeline']} | {l['stage']}\n"
+            summary += f"• {l['name']} (origen: {l['source']})\n"
 
-        return {"answer": explain(summary), "data": leads}
+        summary += f"\nTotal: {len(leads)} lead(s) requieren acción."
+
+        return {
+            "answer": summary,
+            "count": len(leads)
+        }
+
 
     # --- INICIO DEL NUEVO COMANDO ---
     elif "contar" in message.lower():
