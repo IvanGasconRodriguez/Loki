@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from services.ghl import get_opportunities
-from logic.rules import normalize_opportunities, leads_sin_contacto
+from logic.rules import normalize_opportunities, leads_sin_contacto, generar_resumen_diario, discovery_bloqueada, propuestas_sin_respuesta
 from services.llm import explain
 
 app = FastAPI()
@@ -18,9 +18,14 @@ async def chat(req: ChatRequest):
 
     opps = await get_opportunities()
     state = normalize_opportunities(opps)
-
+    if "resumen" in message:
+        resumen, leads, discoveries, propuestas = generar_resumen_diario(state)
+        return {"answer": resumen}
+    
     if "priorizar" in message.lower():
         leads = leads_sin_contacto(state)
+        discoveries = discovery_bloqueada(state)
+        propuestas = propuestas_sin_respuesta(state)
 
         if not leads:
             return {
@@ -33,6 +38,20 @@ async def chat(req: ChatRequest):
             summary += f"• {l['name']} (origen: {l['source']})\n"
 
         summary += f"\nTotal: {len(leads)} lead(s) requieren acción."
+
+        if discoveries:
+            summary += "⚠️ Discoveries no actualizadas:\n"
+            for d in discoveries:
+                summary += f"• {d['name']}\n"
+            summary += "\n"
+
+    if propuestas:
+        summary += "📄 Propuestas sin respuesta:\n"
+        for p in propuestas:
+            summary += f"• {p['name']}\n"
+
+    if not summary:
+        summary = "✅ Todo bajo control hoy."
 
         return {
             "answer": summary,
