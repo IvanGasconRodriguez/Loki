@@ -39,5 +39,10 @@ async def chat(req: ChatRequest):
 
         return {"answer": explain(texto_para_ia), "data": state}
     # --- FIN DEL NUEVO COMANDO ---
+    # --- PARTE NUEVA: Gestión de saludos ---
+    elif any(saludo in message.lower() for saludo in ["hola", "buenas", "saludos"]):
+        # Llamamos a la IA para que el saludo sea natural
+        prompt_saludo = "Saluda al usuario, preséntate como Loki y dile que puedes ayudarle a contar o priorizar sus leads de GHL."
+        return {"answer": explain(prompt_saludo)}
 
     return {"answer": "No entendí la petición."}
