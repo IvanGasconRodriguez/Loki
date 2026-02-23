@@ -29,3 +29,17 @@ async def get_opportunities():
         # GHL devuelve un objeto que contiene una lista llamada 'opportunities'
         data = r.json()
         return data.get("opportunities", [])
+
+
+
+
+async def move_opportunity_stage(opportunity_id, new_stage_id):
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.put(
+            f"{BASE_URL}/opportunities/{opportunity_id}",
+            json={
+                "pipelineStageId": new_stage_id
+            },
+            headers=HEADERS
+        )
+        return r.status_code, r.text

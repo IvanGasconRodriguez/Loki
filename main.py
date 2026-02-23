@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from services.ghl import get_opportunities
 from logic.rules import normalize_opportunities, leads_sin_contacto, generar_resumen_diario, discovery_bloqueada, propuestas_sin_respuesta
 from services.llm import explain
+from logic.intention import interpretar_intencion
+from logic.resolver import find_opportunity_by_name, resolve_stage_id
 
 app = FastAPI()
 
@@ -18,6 +20,22 @@ async def chat(req: ChatRequest):
 
     opps = await get_opportunities()
     state = normalize_opportunities(opps)
+    #TEMPORAL
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    intent = await interpretar_intencion(req.message)
+
+    if intent["action"] == "move_opportunity":
+
+        opp = find_opportunity_by_name(state, intent.get("opportunity_name"))
+        stage_id = resolve_stage_id(intent.get("target_stage"))
+
+        return {
+            "intent": intent,
+            "found_opportunity": opp,
+            "resolved_stage_id": stage_id
+        }
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     if "resumen" in message:
         resumen, leads, discoveries, propuestas = generar_resumen_diario(state)
         return {"answer": resumen}
@@ -69,3 +87,11 @@ async def chat(req: ChatRequest):
     # --- FIN DEL NUEVO COMANDO ---
 
     return {"answer": "No entendí la petición."}
+    
+    
+
+#TEMPORAL
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
