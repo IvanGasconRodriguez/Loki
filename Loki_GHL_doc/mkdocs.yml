@@ -1,0 +1,31 @@
+site_name: Loki AI Agent
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [".."]
+
+nav:
+  - Inicio: index.md
+
+  - Uso:
+      - Guía: usage.md
+      - Configuración: configuration.md
+      - Requisitos: requirements.md
+
+  - Arquitectura:
+      - Overview: architecture.md
+      - Lógica: logic.md
+      - Reglas: rules.md
+      - Servicios: services.md
+
+  - IA:
+      - Prompt: prompt.md
+
+  - Otros:
+      - Limitaciones: limitaciones.md

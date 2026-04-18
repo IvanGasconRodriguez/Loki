@@ -1,1 +1,17 @@
-/.env
+# Entorno virtual
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+
+# Variables sensibles
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# MkDocs build
+site/

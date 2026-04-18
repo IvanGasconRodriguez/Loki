@@ -2,8 +2,10 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from services.ghl import get_opportunities
-from logic.rules import normalize_opportunities, leads_sin_contacto
+from logic.rules import normalize_opportunities, leads_sin_contacto, generar_resumen_diario, discovery_bloqueada, propuestas_sin_respuesta
 from services.llm import explain
+from logic.intention import interpretar_intencion
+from logic.resolver import find_opportunity_by_name, resolve_stage_id
 
 app = FastAPI()
 
@@ -13,23 +15,86 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/loki/chat")
+
 async def chat(req: ChatRequest):
+    """
+    Endpoint principal del agente Loki.
+
+    Procesa mensajes en lenguaje natural, interpreta la intención del usuario
+    y ejecuta acciones sobre el CRM o devuelve información relevante.
+
+    Flujo:
+    1. Obtiene oportunidades del CRM
+    2. Normaliza datos
+    3. Interpreta intención con LLM
+    4. Ejecuta lógica según la acción detectada
+
+    Args:
+        req (ChatRequest): Objeto con el mensaje del usuario.
+
+    Returns:
+        dict: Respuesta estructurada con resultados o mensaje generado.
+    """
     message = req.message
 
     opps = await get_opportunities()
     state = normalize_opportunities(opps)
+    #TEMPORAL
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    intent = await interpretar_intencion(req.message)
+
+    if intent["action"] == "move_opportunity":
+
+        opp = find_opportunity_by_name(state, intent.get("opportunity_name"))
+        stage_id = resolve_stage_id(intent.get("target_stage"))
+
+        return {
+            "intent": intent,
+            "found_opportunity": opp,
+            "resolved_stage_id": stage_id
+        }
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    if "resumen" in message:
+        resumen, leads, discoveries, propuestas = generar_resumen_diario(state)
+        return {"answer": resumen}
+    
     if "priorizar" in message.lower():
         leads = leads_sin_contacto(state)
+        discoveries = discovery_bloqueada(state)
+        propuestas = propuestas_sin_respuesta(state)
 
         if not leads:
-            return {"answer": "No hay leads pendientes por priorizar.", "data": []}
+            return {
+                 "answer": "✅ Todo bajo control. No hay leads nuevos en 'Lead Entrante' pendientes de primer contacto."
+            }
 
-        summary = "Leads sin contactar:\n"
+        summary = "🚨 Leads pendientes de primer contacto:\n\n"
+
         for l in leads:
-            summary += f"- {l['name']} | {l['pipeline']} | {l['stage']}\n"
+            summary += f"• {l['name']} (origen: {l['source']})\n"
 
-        return {"answer": explain(summary), "data": leads}
+        summary += f"\nTotal: {len(leads)} lead(s) requieren acción."
+
+        if discoveries:
+            summary += "⚠️ Discoveries no actualizadas:\n"
+            for d in discoveries:
+                summary += f"• {d['name']}\n"
+            summary += "\n"
+
+    if propuestas:
+        summary += "📄 Propuestas sin respuesta:\n"
+        for p in propuestas:
+            summary += f"• {p['name']}\n"
+
+    if not summary:
+        summary = "✅ Todo bajo control hoy."
+
+        return {
+            "answer": summary,
+            "count": len(leads)
+        }
+
 
     # --- INICIO DEL NUEVO COMANDO ---
     elif "contar" in message.lower():
@@ -41,3 +106,11 @@ async def chat(req: ChatRequest):
     # --- FIN DEL NUEVO COMANDO ---
 
     return {"answer": "No entendí la petición."}
+    
+    
+
+#TEMPORAL
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+

@@ -1,0 +1,55 @@
+# 🧠 Loki AI Agent
+
+Agente de inteligencia artificial para gestión de CRM que interpreta instrucciones en lenguaje natural y ejecuta acciones automáticamente.
+
+---
+
+## 🚀 Características
+
+* Interpretación de intención con OpenAI
+* Automatización de acciones en CRM
+* Generación de resúmenes y priorización de leads
+* API basada en FastAPI
+
+---
+
+## 📚 Documentación
+
+👉 https://tu-usuario.github.io/tu-repo/
+
+---
+
+## ⚙️ Instalación
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## ▶️ Uso
+
+```bash
+uvicorn main:app --reload
+```
+
+---
+
+## 🧪 Ejemplo
+
+```json
+{
+  "message": "mueve la oportunidad Juan a negociación"
+}
+```
+
+---
+
+## 📌 Stack
+
+* Python
+* FastAPI
+* OpenAI
+* HTTPX
+
+---
