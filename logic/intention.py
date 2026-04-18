@@ -35,7 +35,30 @@ Si no detectas acción clara:
 """
 
 
-async def interpretar_intencion(message: str):
+async def interpretar_intencion(message: str) -> dict:
+    """
+    Interpreta la intención del usuario a partir de un mensaje en lenguaje natural
+    utilizando un modelo de OpenAI.
+
+    El modelo devuelve una respuesta en formato JSON con una acción específica
+    relacionada con operaciones en el CRM.
+
+    Args:
+        message (str): Texto enviado por el usuario.
+
+    Returns:
+        dict: Diccionario con la intención detectada. Ejemplo:
+            {
+                "action": "move_opportunity",
+                "opportunity_name": "Juan",
+                "target_stage": "Negociación",
+                "tag": "...",
+                "task_description": "..."
+            }
+
+        En caso de error o si no se detecta intención clara:
+            {"action": "none"}
+    """
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
         temperature=0,

@@ -15,7 +15,26 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/loki/chat")
+
 async def chat(req: ChatRequest):
+    """
+    Endpoint principal del agente Loki.
+
+    Procesa mensajes en lenguaje natural, interpreta la intención del usuario
+    y ejecuta acciones sobre el CRM o devuelve información relevante.
+
+    Flujo:
+    1. Obtiene oportunidades del CRM
+    2. Normaliza datos
+    3. Interpreta intención con LLM
+    4. Ejecuta lógica según la acción detectada
+
+    Args:
+        req (ChatRequest): Objeto con el mensaje del usuario.
+
+    Returns:
+        dict: Respuesta estructurada con resultados o mensaje generado.
+    """
     message = req.message
 
     opps = await get_opportunities()

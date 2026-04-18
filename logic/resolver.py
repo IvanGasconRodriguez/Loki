@@ -1,4 +1,14 @@
-def find_opportunity_by_name(state, name):
+def find_opportunity_by_name(state: list, name: str) -> dict | None:
+    """
+    Busca una oportunidad dentro del estado del CRM por coincidencia de nombre.
+
+    Args:
+        state (list): Lista de oportunidades normalizadas.
+        name (str): Nombre (o parte del nombre) de la oportunidad.
+
+    Returns:
+        dict | None: La oportunidad encontrada o None si no existe coincidencia.
+    """
     if not name:
         return None
 
@@ -22,7 +32,18 @@ STAGE_MAP = {
 }
 
 
-def resolve_stage_id(stage_name):
+def resolve_stage_id(stage_name: str) -> str | None:
+    """
+    Convierte un nombre de etapa a su ID correspondiente dentro del pipeline.
+
+    La búsqueda se realiza de forma flexible (case-insensitive y parcial).
+
+    Args:
+        stage_name (str): Nombre de la etapa (ej. "Negociación").
+
+    Returns:
+        str | None: ID de la etapa o None si no se encuentra.
+    """
     if not stage_name:
         return None
 
